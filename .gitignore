@@ -1,4 +1,5 @@
-# compilation database (generated with `compiledb make`)
+# Compilation database (generated with `compiledb make`).
 compile_commands.json
 
-.output
+# Build output dir.
+output

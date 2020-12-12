@@ -1,4 +1,4 @@
-OUTPUT := .output
+OUTPUT := output
 CLANG ?= clang
 LLVM_STRIP ?= llvm-strip
 BPFTOOL ?= tools/bpftool
