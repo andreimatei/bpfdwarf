@@ -105,17 +105,13 @@ int main(int argc, char **argv) {
 	}
 
 	// Attach uprobe handler.
-	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(skel->progs.probe,
+	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(
+			skel->progs.probe,
 			false /* retprobe */,
 			env.pid,
 			env.binary,
 			env.offset);
-	err = libbpf_get_error(link);
-	// TODO(andrei): this error check doesn't seem to work. Call it with a bad pid and you get
-	// the following error output, but this branch doesn't kick in.
-	// libbpf: uprobe perf_event_open() failed: No such process
-	// libbpf: prog 'probe': failed to create uprobe '/home/andrei/work/src/bpf/bpfdwarf/example/example:0x1169' perf event: No such process
-	if (err){
+	if (libbpf_get_error(uprobe_link)) {
 		printf("bpf_program__attach_uprobe failed: %d\n", err);
 		uprobe_link = NULL;
 		goto cleanup;

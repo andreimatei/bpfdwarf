@@ -65,7 +65,7 @@ $(OUTPUT)/bpfdwarf.o: bpfdwarf.c $(wildcard %.h) $(OUTPUT)/probe.skel.h | $(OUTP
 # Build application binary
 $(OUTPUT)/bpfdwarf: $(OUTPUT)/bpfdwarf.o $(LIBBPF_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
-	$(Q)$(CC) $(CFLAGS) $(OUTPUT)/bpfdwarf.o deps/libbpf.a -lelf -lz -o $@
+	$(Q)$(CC) $(CFLAGS) $(OUTPUT)/bpfdwarf.o $(LIBBPF_OBJ) -lelf -lz -o $@
 
 # delete failed targets
 .DELETE_ON_ERROR:
