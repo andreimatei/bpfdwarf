@@ -1,5 +1,3 @@
-.DEFAULT_GOAL := bpfdwarf
-
 OUTPUT := .output
 CLANG ?= clang
 LLVM_STRIP ?= llvm-strip
@@ -9,6 +7,8 @@ LIBBPF_OBJ := $(abspath $(OUTPUT)/libbpf.a)
 INCLUDES := -I$(OUTPUT)
 CFLAGS := -g -Wall
 ARCH := $(shell uname -m | sed 's/x86_64/x86/')
+
+.DEFAULT_GOAL := $(OUTPUT)/bpfdwarf
 
 # Get Clang's default includes on this system. We'll explicitly add these dirs
 # to the includes list when compiling with `-target bpf` because otherwise some
@@ -63,7 +63,7 @@ $(OUTPUT)/bpfdwarf.o: bpfdwarf.c $(wildcard %.h) $(OUTPUT)/probe.skel.h | $(OUTP
 	$(Q)$(CC) $(CFLAGS) $(INCLUDES) -c $(filter %.c,$^) -o $@
 
 # Build application binary
-bpfdwarf: $(OUTPUT)/bpfdwarf.o $(LIBBPF_OBJ) | $(OUTPUT)
+$(OUTPUT)/bpfdwarf: $(OUTPUT)/bpfdwarf.o $(LIBBPF_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
 	$(Q)$(CC) $(CFLAGS) $(OUTPUT)/bpfdwarf.o deps/libbpf.a -lelf -lz -o $@
 
