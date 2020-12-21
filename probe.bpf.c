@@ -41,6 +41,9 @@ static void stack_push(struct stack* st, long word) {
 // Execute one instruction. Returns how many bytes were consumed from instr.
 // Returns 0 on success.
 static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
+	if (p->ip > 10) {
+		return 1;  // !!!
+	}
 	switch (p->instr[p->ip]) {
 		case DW_OP_CALL_FRAME_CFA:
 			// stack_push(st, ctx->cfa);
@@ -90,30 +93,31 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	int i;
 	int ok;
 	for (i = 0; i < 10; i++) {
+		int ip = prog->ip;
 		if (prog->ip >= prog->len) {
 			break;
 		}
-		int x = prog->ip;
+		if (ip > 10) return 1;
 		// !!! if ((x == 0) || (x == 1)) {
-		if (x < 3) {
-			switch (prog->instr[x]) {
-				case DW_OP_CALL_FRAME_CFA:
-					// stack_push(st, ctx->cfa);
-					//p->ip++;
-					return 0;
-				case DW_OP_FBREG:
-					// TODO(andrei): Deal with SLEB decoding.
-					// stack_push(st, ctx->fb + p->instr[p->ip+1]);
-					prog->ip += 2;
-					return 0;
+			// switch (prog->instr[ip]) {
+			// 	case DW_OP_CALL_FRAME_CFA:
+			// 		// stack_push(st, ctx->cfa);
+			// 		//p->ip++;
+			// 		return 0;
+			// 	case DW_OP_FBREG:
+			// 		// TODO(andrei): Deal with SLEB decoding.
+			// 		// stack_push(st, ctx->fb + p->instr[p->ip+1]);
+			// 		prog->ip += 2;
+			// 		return 0;
+			// }
+
+
+
+			ok = exec_one(prog, ctx, st);
+			if (ok != 0) {
+				return ok;
 			}
 
-
-			// ok = exec_one(prog, ctx, st);
-			// if (ok != 0) {
-			// 	return ok;
-			// }
-		}
 	}
 	// !!!
 	// while (prog->ip <	prog->len) {
