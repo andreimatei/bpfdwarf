@@ -24,34 +24,77 @@ struct exec_ctx {
 #define STACK_MAX_WORDS 10
 
 struct stack {
-	long buf[STACK_MAX_WORDS];
-	int top;  // top points to the first empty word
+	long buf[STACK_MAX_WORDS];  // uint64_t
+	unsigned int top;  // top points to the first empty word
+	// !!! size_t
 };
 
+#define CHECK_STACK(st) if (st->top > 10) return 0;
+
 static long stack_top(struct stack* st) {
+	if (st->top == 0) return 0;
+	CHECK_STACK(st);
 	return st->buf[st->top-1];
 }
 
 // TODO(andrei): Deal with stack overflow.
 static void stack_push(struct stack* st, long word) {
+	if (st->top > 1) return;
 	st->buf[st->top] = word;
 	st->top++;
 }
 
-// Execute one instruction. Returns how many bytes were consumed from instr.
-// Returns 0 on success.
-static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
-	if (p->ip > 10) {
-		return 1;  // !!!
-	}
-	switch (p->instr[p->ip]) {
+#define CHECK_PROG(p) if (p->ip >= PROG_MAX_INSTR) return 1;
+
+// Execute one instruction. Returns 0 on success.
+//
+// p->ip is updated.
+// static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
+// 	CHECK_PROG(p);
+// 	const unsigned int ip = p->ip;
+// 	unsigned char* instr = p->instr;
+// 	if (ip >= (PROG_MAX_INSTR - 2)) { return 1; }
+// 	long immediate;
+// 	//immediate = *(instr+ip+1);  // ip+212 works, +212 doesn't
+// 	//immediate = instr[ip+1];  // p->instr[ip] works
+// 	//immediate = p->instr[ip+1];
+// 	unsigned char ins = instr[ip];
+// 	switch (ins) {
+// 	//switch (p->instr[ip]) {
+// 		case DW_OP_CALL_FRAME_CFA:
+// 			// !!!
+// 			// stack_push(st, ctx->cfa);
+// 			//p->ip++;
+// 			return 0;
+// 		case DW_OP_FBREG:
+// 			// TODO(andrei): Deal with SLEB decoding.
+// 			// if (ip > 2) {
+// 			// 	bpf_printk("!!! xxx");
+// 			// 	return 1;
+// 			// }
+// 			immediate = instr[ip+1];
+// 			// immediate = *(p->instr +ip + 1); // THIS ONE WORKS INSTEAD OF THE LINE ABOVE
+// 			stack_push(st, ctx->fb + immediate);
+// 			p->ip += 2;
+// 			return 0;
+// 	}
+// 	return 1;
+// }
+
+static int exec_one_repro(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
+	CHECK_PROG(p);
+	const unsigned int ip = p->ip;
+	unsigned char* instr = p->instr;
+	if (ip >= (PROG_MAX_INSTR - 2)) { return 189; }
+	long immediate;
+	unsigned char ins = instr[ip];
+	switch (ins) {
 		case DW_OP_CALL_FRAME_CFA:
-			// stack_push(st, ctx->cfa);
-			//p->ip++;
 			return 0;
 		case DW_OP_FBREG:
-			// TODO(andrei): Deal with SLEB decoding.
-			// stack_push(st, ctx->fb + p->instr[p->ip+1]);
+			immediate = instr[ip+1];  // This gets rejected under -O2 but not under -O3.
+			// immediate = *(instr + ip + 1); // This one works instead of the line above.
+			stack_push(st, ctx->fb + immediate);
 			p->ip += 2;
 			return 0;
 	}
@@ -91,33 +134,18 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	struct stack* st = (struct stack*)stack_buf;
 	st->top = 0;
 	int i;
-	int ok;
-	for (i = 0; i < 10; i++) {
-		int ip = prog->ip;
+	// Loop over the program's instructions; we have to put the maximum
+	// instruction limit as the loop's limit to appease the verifier, but we'll
+	// break out from the loop early when the program is done.
+	for (i = 0; i < PROG_MAX_INSTR; i++) {
+		CHECK_PROG(prog);
 		if (prog->ip >= prog->len) {
 			break;
 		}
-		if (ip > 10) return 1;
-		// !!! if ((x == 0) || (x == 1)) {
-			// switch (prog->instr[ip]) {
-			// 	case DW_OP_CALL_FRAME_CFA:
-			// 		// stack_push(st, ctx->cfa);
-			// 		//p->ip++;
-			// 		return 0;
-			// 	case DW_OP_FBREG:
-			// 		// TODO(andrei): Deal with SLEB decoding.
-			// 		// stack_push(st, ctx->fb + p->instr[p->ip+1]);
-			// 		prog->ip += 2;
-			// 		return 0;
-			// }
-
-
-
-			ok = exec_one(prog, ctx, st);
-			if (ok != 0) {
-				return ok;
-			}
-
+		int ok = exec_one_repro(prog, ctx, st);
+		if (ok != 0) {
+			return ok;
+		}
 	}
 	// !!!
 	// while (prog->ip <	prog->len) {
@@ -139,15 +167,6 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	bpf_printk("returning from program");
 	*res = stack_top(st);
 	return 0;
-}
-
-// !!!
-static int xxx() {
-	struct stack* st = (struct stack*)stack_buf;
-	if (st->top == 0) {
-		return 2;
-	}
-	return 1;
 }
 
 // int bpf_probe_read_user(void *dst, u32 size, const void *unsafe_ptr)
@@ -172,12 +191,10 @@ int probe(struct pt_regs* regs) {
 	}
 	// Compute framebase.
 	int status;
-	/*
 	status = exec_prog(&ctx.fb, &req.frame.fb_loc_prog, &ctx);
 	if (status != 0) {
 		return status;
 	}
-	*/
 
 
 	/*
@@ -194,20 +211,11 @@ int probe(struct pt_regs* regs) {
 	*/
 
 	long loc;
-	int status2 = exec_prog(&loc, &req.loc, &ctx);
-	//int x = xxx();
-	//bpf_printk("!!! x = %d", x);
-
-	bpf_printk("!!! loc: 0x%x", loc);
-	// !!!
-	if (status2 != 0) {
-		if (status2 == 2) {
-			//bpf_printk("!!! loc: 0x%x", loc);
-			return 2;
-		}
-		return 1;
+	status = exec_prog(&loc, &req.loc, &ctx);
+	if (status != 0) {
+		return status;
 	}
-	// bpf_printk("computed location: 0x%x", loc);
+	bpf_printk("computed location: 0x%x", loc);
 
 	return 1;
 }

@@ -35,9 +35,9 @@ struct register_rule {
 #define PROG_MAX_INSTR 10
 
 struct loc_prog {
+  unsigned int ip;  // ip points to the next instruction to execute. !!! size_t
   unsigned char instr[PROG_MAX_INSTR];
   int len; // len is number of bytes in instr.
-  unsigned int ip;  // ip points to the next instruction to execute.
 };
 
 struct frame_spec {

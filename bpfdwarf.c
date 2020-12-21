@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 	}
 
 	skel->bss->req.frame.cfa_rule = (struct register_rule){.rule = RULE_FRAME_POINTER, .reg = REG_SP, .offset = 8};
-	skel->bss->req.frame.fb_loc_prog = (struct loc_prog){.len = 1, .instr = {0x9c}};
+	skel->bss->req.frame.fb_loc_prog = (struct loc_prog){.len = 1, .instr = {0x9c, 0x01, 0x01}};  // !!! added dummy instructions
 	skel->bss->req.loc= (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
 
 	// Attach uprobe handler.
