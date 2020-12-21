@@ -5,6 +5,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <bpf/libbpf.h>
+#include "probe.bpf.h"
 #include "probe.skel.h"
 
 static struct env {
@@ -103,6 +104,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
+
+	skel->bss->req.frame.CFA_rule = (struct register_rule){.rule = RULE_FRAME_POINTER, .reg = REG_SP, .offset = 8};
+	skel->bss->req.loc_program[0] = 0x9c;
+	skel->bss->req.loc_len = 1;
 
 	// Attach uprobe handler.
 	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(
