@@ -51,10 +51,11 @@ $(LIBBPF_OBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(OUTPU
 $(OUTPUT)/probe.bpf.o: probe.bpf.c $(LIBBPF_OBJ) $(wildcard %.h) | $(OUTPUT)
 	$(call msg,BPF,$@)
 	$(Q)$(CLANG) -g $(OPT) -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
-	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
+#	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
 
 # Generate BPF skeletons
 $(OUTPUT)/probe.skel.h: $(OUTPUT)/probe.bpf.o | $(OUTPUT)
+#$(OUTPUT)/probe.skel.h: probe.bpf.o | $(OUTPUT)
 	$(call msg,GEN-SKEL,$@)
 	$(Q)$(BPFTOOL) gen skeleton $< > $@
 

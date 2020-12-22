@@ -231,7 +231,6 @@ LBB0_7:
 	#DEBUG_VALUE: probe:loc <- [DW_OP_plus_uconst 24, DW_OP_deref] $r10
 	.loc	1 214 11                        # probe.bpf.c:214:11
 .Ltmp81:
-// !!! is this the relevant r2?
 	r2 = req ll
 	r2 += 40
 	r1 = r10
@@ -582,7 +581,6 @@ LBB1_1:                                 # =>This Inner Loop Header: Depth=1
 	#DEBUG_VALUE: exec_prog:prog <- $r8
 	#DEBUG_VALUE: exec_one_repro:ip <- $r2
 	.loc	1 95 24 is_stmt 1               # probe.bpf.c:95:24
-!!! immediate = instr[ip+1]; 
 .Ltmp182:
 	r9 = r2
 	r9 += 1

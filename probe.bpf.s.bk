@@ -231,7 +231,6 @@ LBB0_7:
 	#DEBUG_VALUE: probe:loc <- [DW_OP_plus_uconst 24, DW_OP_deref] $r10
 	.loc	1 214 11                        # probe.bpf.c:214:11
 .Ltmp81:
-// !!! is this the relevant r2?
 	r2 = req ll
 	r2 += 40
 	r1 = r10
@@ -301,14 +300,14 @@ exec_prog:                              # @exec_prog
 	#DEBUG_VALUE: exec_prog:res <- $r1
 	#DEBUG_VALUE: exec_prog:prog <- $r2
 	#DEBUG_VALUE: exec_prog:ctx <- $r3
-	*(u64 *)(r10 - 32) = r3
-	r8 = r2
-	*(u64 *)(r10 - 40) = r1
+	r7 = r3
+	r6 = r2
+	*(u64 *)(r10 - 32) = r1
 	r1 = 109
 .Ltmp98:
 .Ltmp99:
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
 	.loc	1 133 2 prologue_end            # probe.bpf.c:133:2
 .Ltmp100:
@@ -342,33 +341,32 @@ exec_prog:                              # @exec_prog
 	#DEBUG_VALUE: exec_prog:i <- 0
 	.loc	1 141 3                         # probe.bpf.c:141:3
 .Ltmp112:
-	r2 = *(u32 *)(r8 + 0)
-	r7 = 1
+	r2 = *(u32 *)(r6 + 0)
 	goto LBB1_1
 .Ltmp113:
 .Ltmp114:
 LBB1_8:                                 #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	#DEBUG_VALUE: exec_one_repro:ip <- $r2
 	.loc	1 98 10                         # probe.bpf.c:98:10
 .Ltmp115:
 	r2 += 2
 .Ltmp116:
 .Ltmp117:
-	*(u32 *)(r8 + 0) = r2
+	*(u32 *)(r6 + 0) = r2
 .Ltmp118:
 .Ltmp119:
 LBB1_9:                                 #   in Loop: Header=BB1_1 Depth=1
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	#DEBUG_VALUE: exec_prog:i <- [DW_OP_plus_uconst 1, DW_OP_stack_value] undef
-	#DEBUG_VALUE: ok <- 1
+	#DEBUG_VALUE: ok <- undef
 	.loc	1 140 16                        # probe.bpf.c:140:16
 .Ltmp120:
 	r4 += -1
@@ -384,8 +382,8 @@ LBB1_9:                                 #   in Loop: Header=BB1_1 Depth=1
 .Ltmp125:
 LBB1_10:
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	.loc	1 158 15 is_stmt 1              # probe.bpf.c:158:15
 .Ltmp126:
 	r2 <<= 32
@@ -397,32 +395,38 @@ LBB1_10:
 	r5 >>= 32
 .Ltmp128:
 .Ltmp129:
-	.loc	1 158 6                         # probe.bpf.c:158:6
+	.loc	1 0 0                           # probe.bpf.c:0:0
 .Ltmp130:
-	if r2 != r5 goto LBB1_15
+	r9 = 1
+	.loc	1 158 6                         # probe.bpf.c:158:6
 .Ltmp131:
+	if r2 != r5 goto LBB1_15
 .Ltmp132:
+.Ltmp133:
 # %bb.11:
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	.loc	1 0 6                           # probe.bpf.c:0:6
 	r1 <<= 32
 	r1 >>= 32
-	.loc	1 158 6                         # probe.bpf.c:158:6
-	if r1 == 0 goto LBB1_15
-.Ltmp133:
 .Ltmp134:
-# %bb.12:
-	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	.loc	1 0 6                           # probe.bpf.c:0:6
-	r1 = 28001
+	r9 = 1
+	.loc	1 158 6                         # probe.bpf.c:158:6
 .Ltmp135:
-	.loc	1 167 2 is_stmt 1               # probe.bpf.c:167:2
+	if r1 == 0 goto LBB1_15
 .Ltmp136:
 .Ltmp137:
+# %bb.12:
+	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	.loc	1 0 6                           # probe.bpf.c:0:6
+	r1 = 28001
+.Ltmp138:
+	.loc	1 167 2 is_stmt 1               # probe.bpf.c:167:2
+.Ltmp139:
+.Ltmp140:
 	*(u16 *)(r10 - 4) = r1
 	r1 = 1919381362
 	*(u32 *)(r10 - 8) = r1
@@ -430,219 +434,234 @@ LBB1_10:
 	*(u64 *)(r10 - 16) = r1
 	r1 = 7956011654602581362 ll
 	*(u64 *)(r10 - 24) = r1
-	r7 = 0
-	*(u8 *)(r10 - 2) = r7
+	r9 = 0
+	*(u8 *)(r10 - 2) = r9
 	r1 = r10
 	r1 += -24
 	r2 = 23
 	call 6
-.Ltmp138:
-.Ltmp139:
-	.loc	1 35 10                         # probe.bpf.c:35:10
-.Ltmp140:
-	r1 = stack_buf ll
-	r2 = *(u32 *)(r1 + 80)
 .Ltmp141:
 .Ltmp142:
-	.loc	1 35 6 is_stmt 0                # probe.bpf.c:35:6
+	.loc	1 35 10                         # probe.bpf.c:35:10
 .Ltmp143:
+	r1 = stack_buf ll
+	r2 = *(u32 *)(r1 + 80)
+.Ltmp144:
+.Ltmp145:
+	.loc	1 35 6 is_stmt 0                # probe.bpf.c:35:6
+.Ltmp146:
 	r2 += -1
 	r2 <<= 32
 	r2 >>= 32
 	.loc	1 0 0                           # probe.bpf.c:0:0
-.Ltmp144:
+.Ltmp147:
 	r3 = 0
 	.loc	1 35 6                          # probe.bpf.c:35:6
-.Ltmp145:
+.Ltmp148:
 	if r2 > 9 goto LBB1_14
-.Ltmp146:
-.Ltmp147:
+.Ltmp149:
+.Ltmp150:
 # %bb.13:
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	.loc	1 37 9 is_stmt 1                # probe.bpf.c:37:9
-.Ltmp148:
+.Ltmp151:
 	r2 <<= 3
 	r1 += r2
 	r3 = *(u64 *)(r1 + 0)
 	goto LBB1_14
-.Ltmp149:
-.Ltmp150:
-LBB1_1:                                 # =>This Inner Loop Header: Depth=1
-	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	#DEBUG_VALUE: exec_prog:i <- undef
-	.loc	1 141 3                         # probe.bpf.c:141:3
-.Ltmp151:
-	r0 = r2
-	r0 <<= 32
-	r0 >>= 32
 .Ltmp152:
 .Ltmp153:
-	.loc	1 141 3 is_stmt 0               # probe.bpf.c:141:3
+LBB1_1:                                 # =>This Inner Loop Header: Depth=1
+	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	#DEBUG_VALUE: exec_prog:i <- undef
+	.loc	1 141 3                         # probe.bpf.c:141:3
 .Ltmp154:
-	if r0 > 9 goto LBB1_15
-.Ltmp155:
-.Ltmp156:
-# %bb.2:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	.loc	1 142 25 is_stmt 1              # probe.bpf.c:142:25
-.Ltmp157:
-	r5 = *(u32 *)(r8 + 16)
-.Ltmp158:
-.Ltmp159:
-	.loc	1 142 7 is_stmt 0               # probe.bpf.c:142:7
-.Ltmp160:
-	if r0 >= r5 goto LBB1_10
-.Ltmp161:
-.Ltmp162:
-# %bb.3:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	.loc	1 0 7                           # probe.bpf.c:0:7
 	r0 = r2
 	r0 <<= 32
 	r0 >>= 32
-.Ltmp163:
-.Ltmp164:
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_one_repro:ip <- $r2
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	.loc	1 85 2 is_stmt 1                # probe.bpf.c:85:2
-.Ltmp165:
-	if r0 > 7 goto LBB1_15
-.Ltmp166:
-.Ltmp167:
-# %bb.4:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
+.Ltmp155:
+.Ltmp156:
+	.loc	1 0 0 is_stmt 0                 # probe.bpf.c:0:0
+.Ltmp157:
+	r9 = 1
+.Ltmp158:
+	.loc	1 141 3                         # probe.bpf.c:141:3
+.Ltmp159:
+.Ltmp160:
+	if r0 > 9 goto LBB1_15
+.Ltmp161:
+.Ltmp162:
+# %bb.2:                                #   in Loop: Header=BB1_1 Depth=1
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	#DEBUG_VALUE: exec_one_repro:ip <- $r2
-	.loc	1 90 22                         # probe.bpf.c:90:22
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	.loc	1 142 25 is_stmt 1              # probe.bpf.c:142:25
+.Ltmp163:
+	r5 = *(u32 *)(r6 + 16)
+.Ltmp164:
+.Ltmp165:
+	.loc	1 142 7 is_stmt 0               # probe.bpf.c:142:7
+.Ltmp166:
+	if r0 >= r5 goto LBB1_10
+.Ltmp167:
 .Ltmp168:
-	r9 = r8
-	r9 += r0
-	r0 = *(u8 *)(r9 + 4)
+# %bb.3:                                #   in Loop: Header=BB1_1 Depth=1
+	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	.loc	1 0 7                           # probe.bpf.c:0:7
+	r9 = 189
 .Ltmp169:
 .Ltmp170:
-	#DEBUG_VALUE: exec_one_repro:ins <- undef
-	.loc	1 91 2                          # probe.bpf.c:91:2
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_one_repro:ip <- $r2
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	.loc	1 88 9 is_stmt 1                # probe.bpf.c:88:9
 .Ltmp171:
-	if r0 == 156 goto LBB1_9
+	r0 = r2
+	r0 <<= 32
+	r0 >>= 32
 .Ltmp172:
 .Ltmp173:
-# %bb.5:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_prog:prog <- $r8
-	#DEBUG_VALUE: exec_one_repro:ip <- $r2
-	if r0 != 145 goto LBB1_15
+	.loc	1 88 6 is_stmt 0                # probe.bpf.c:88:6
 .Ltmp174:
+	if r0 > 7 goto LBB1_15
 .Ltmp175:
-# %bb.6:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
+.Ltmp176:
+# %bb.4:                                #   in Loop: Header=BB1_1 Depth=1
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	#DEBUG_VALUE: exec_one_repro:ip <- $r2
+	.loc	1 90 22 is_stmt 1               # probe.bpf.c:90:22
+.Ltmp177:
+	r9 = r6
+	r9 += r0
+	r0 = *(u8 *)(r9 + 4)
+.Ltmp178:
+.Ltmp179:
+	#DEBUG_VALUE: exec_one_repro:ins <- undef
+	.loc	1 91 2                          # probe.bpf.c:91:2
+.Ltmp180:
+	if r0 == 156 goto LBB1_9
+.Ltmp181:
+.Ltmp182:
+# %bb.5:                                #   in Loop: Header=BB1_1 Depth=1
+	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_prog:prog <- $r6
+	#DEBUG_VALUE: exec_one_repro:ip <- $r2
+	.loc	1 0 0 is_stmt 0                 # probe.bpf.c:0:0
+.Ltmp183:
+	r9 = 1
+.Ltmp184:
+	.loc	1 91 2                          # probe.bpf.c:91:2
+.Ltmp185:
+.Ltmp186:
+	if r0 != 145 goto LBB1_15
+.Ltmp187:
+.Ltmp188:
+# %bb.6:                                #   in Loop: Header=BB1_1 Depth=1
+	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	#DEBUG_VALUE: exec_one_repro:ip <- $r2
 	#DEBUG_VALUE: exec_one_repro:immediate <- [DW_OP_LLVM_convert 8 7, DW_OP_LLVM_convert 64 7, DW_OP_stack_value] undef
 	#DEBUG_VALUE: stack_push:word <- undef
-	.loc	1 42 14                         # probe.bpf.c:42:14
-.Ltmp176:
+	.loc	1 42 14 is_stmt 1               # probe.bpf.c:42:14
+.Ltmp189:
 	r0 = r1
 	r0 <<= 32
 	r0 >>= 32
-.Ltmp177:
-.Ltmp178:
+.Ltmp190:
+.Ltmp191:
 	.loc	1 42 6 is_stmt 0                # probe.bpf.c:42:6
-.Ltmp179:
+.Ltmp192:
 	if r0 > 1 goto LBB1_8
-.Ltmp180:
-.Ltmp181:
+.Ltmp193:
+.Ltmp194:
 # %bb.7:                                #   in Loop: Header=BB1_1 Depth=1
-	#DEBUG_VALUE: exec_one_repro:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_one_repro:p <- $r8
-	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r8
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_one_repro:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_one_repro:p <- $r6
+	#DEBUG_VALUE: exec_one_repro:instr <- [DW_OP_plus_uconst 4, DW_OP_stack_value] $r6
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	#DEBUG_VALUE: exec_one_repro:ip <- $r2
 	.loc	1 95 24 is_stmt 1               # probe.bpf.c:95:24
-!!! immediate = instr[ip+1]; 
-.Ltmp182:
+.Ltmp195:
 	r9 = r2
 	r9 += 1
 	.loc	1 95 16 is_stmt 0               # probe.bpf.c:95:16
-.Ltmp183:
+.Ltmp196:
 	r9 <<= 32
 	r9 >>= 32
-	r6 = r8
-	r6 += r9
-	r6 = *(u8 *)(r6 + 4)
+	r8 = r6
+	r8 += r9
+	r8 = *(u8 *)(r8 + 4)
 	.loc	1 97 24 is_stmt 1               # probe.bpf.c:97:24
-.Ltmp184:
-	r9 = *(u64 *)(r10 - 32)
-	r9 = *(u64 *)(r9 + 16)
-.Ltmp185:
-.Ltmp186:
-	#DEBUG_VALUE: exec_one_repro:immediate <- $r6
+.Ltmp197:
+	r9 = *(u64 *)(r7 + 16)
+.Ltmp198:
+.Ltmp199:
+	#DEBUG_VALUE: exec_one_repro:immediate <- $r8
 	.loc	1 97 27 is_stmt 0               # probe.bpf.c:97:27
-.Ltmp187:
-	r9 += r6
-.Ltmp188:
-.Ltmp189:
+.Ltmp200:
+	r9 += r8
+.Ltmp201:
+.Ltmp202:
 	#DEBUG_VALUE: stack_push:word <- $r9
 	.loc	1 43 2 is_stmt 1                # probe.bpf.c:43:2
-.Ltmp190:
+.Ltmp203:
 	r0 <<= 3
-	r6 = stack_buf ll
-.Ltmp191:
-.Ltmp192:
-	r6 += r0
+	r8 = stack_buf ll
+.Ltmp204:
+.Ltmp205:
+	r8 += r0
 	.loc	1 43 19 is_stmt 0               # probe.bpf.c:43:19
-.Ltmp193:
-	*(u64 *)(r6 + 0) = r9
+.Ltmp206:
+	*(u64 *)(r8 + 0) = r9
 	.loc	1 44 9 is_stmt 1                # probe.bpf.c:44:9
-.Ltmp194:
+.Ltmp207:
 	r1 += 1
 	*(u32 *)(r3 + 80) = r1
 	goto LBB1_8
-.Ltmp195:
-.Ltmp196:
+.Ltmp208:
+.Ltmp209:
 LBB1_14:
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	.loc	1 168 7                         # probe.bpf.c:168:7
-.Ltmp197:
-	r1 = *(u64 *)(r10 - 40)
+.Ltmp210:
+	r1 = *(u64 *)(r10 - 32)
 	*(u64 *)(r1 + 0) = r3
-.Ltmp198:
-.Ltmp199:
+.Ltmp211:
+.Ltmp212:
 LBB1_15:
 	#DEBUG_VALUE: exec_prog:res <- [$r10+0]
-	#DEBUG_VALUE: exec_prog:ctx <- [DW_OP_plus_uconst 8] [$r10+0]
-	#DEBUG_VALUE: exec_prog:prog <- $r8
+	#DEBUG_VALUE: exec_prog:ctx <- $r7
+	#DEBUG_VALUE: exec_prog:prog <- $r6
 	.loc	1 170 1                         # probe.bpf.c:170:1
-.Ltmp200:
-	r0 = r7
+.Ltmp213:
+	r0 = r9
 	exit
-.Ltmp201:
-.Ltmp202:
+.Ltmp214:
+.Ltmp215:
 .Lfunc_end1:
 	.size	exec_prog, .Lfunc_end1-exec_prog
 	.cfi_endproc
@@ -803,7 +822,7 @@ stack_buf:
 	.quad	.Ltmp98-.Lfunc_begin1
 	.quad	.Lfunc_end1-.Lfunc_begin1
 	.short	1                               # Loc expr size
-	.byte	88                              # DW_OP_reg8
+	.byte	86                              # DW_OP_reg6
 	.quad	0
 	.quad	0
 .Ldebug_loc8:
@@ -815,9 +834,8 @@ stack_buf:
 	.byte	83                              # DW_OP_reg3
 	.quad	.Ltmp98-.Lfunc_begin1
 	.quad	.Lfunc_end1-.Lfunc_begin1
-	.short	2                               # Loc expr size
-	.byte	122                             # DW_OP_breg10
-	.byte	8                               # 8
+	.short	1                               # Loc expr size
+	.byte	87                              # DW_OP_reg7
 	.quad	0
 	.quad	0
 .Ldebug_loc9:
@@ -836,14 +854,12 @@ stack_buf:
 	.quad	.Lfunc_begin1                   #   base address
 	.quad	.Ltmp113-.Lfunc_begin1
 	.quad	.Ltmp118-.Lfunc_begin1
-	.short	2                               # Loc expr size
-	.byte	122                             # DW_OP_breg10
-	.byte	8                               # 8
-	.quad	.Ltmp163-.Lfunc_begin1
-	.quad	.Ltmp195-.Lfunc_begin1
-	.short	2                               # Loc expr size
-	.byte	122                             # DW_OP_breg10
-	.byte	8                               # 8
+	.short	1                               # Loc expr size
+	.byte	87                              # DW_OP_reg7
+	.quad	.Ltmp169-.Lfunc_begin1
+	.quad	.Ltmp208-.Lfunc_begin1
+	.short	1                               # Loc expr size
+	.byte	87                              # DW_OP_reg7
 	.quad	0
 	.quad	0
 .Ldebug_loc11:
@@ -852,11 +868,11 @@ stack_buf:
 	.quad	.Ltmp113-.Lfunc_begin1
 	.quad	.Ltmp118-.Lfunc_begin1
 	.short	1                               # Loc expr size
-	.byte	88                              # DW_OP_reg8
-	.quad	.Ltmp163-.Lfunc_begin1
-	.quad	.Ltmp195-.Lfunc_begin1
+	.byte	86                              # DW_OP_reg6
+	.quad	.Ltmp169-.Lfunc_begin1
+	.quad	.Ltmp208-.Lfunc_begin1
 	.short	1                               # Loc expr size
-	.byte	88                              # DW_OP_reg8
+	.byte	86                              # DW_OP_reg6
 	.quad	0
 	.quad	0
 .Ldebug_loc12:
@@ -865,13 +881,13 @@ stack_buf:
 	.quad	.Ltmp113-.Lfunc_begin1
 	.quad	.Ltmp118-.Lfunc_begin1
 	.short	3                               # Loc expr size
-	.byte	120                             # DW_OP_breg8
+	.byte	118                             # DW_OP_breg6
 	.byte	4                               # 4
 	.byte	159                             # DW_OP_stack_value
-	.quad	.Ltmp163-.Lfunc_begin1
-	.quad	.Ltmp195-.Lfunc_begin1
+	.quad	.Ltmp169-.Lfunc_begin1
+	.quad	.Ltmp208-.Lfunc_begin1
 	.short	3                               # Loc expr size
-	.byte	120                             # DW_OP_breg8
+	.byte	118                             # DW_OP_breg6
 	.byte	4                               # 4
 	.byte	159                             # DW_OP_stack_value
 	.quad	0
@@ -883,8 +899,8 @@ stack_buf:
 	.quad	.Ltmp116-.Lfunc_begin1
 	.short	1                               # Loc expr size
 	.byte	82                              # DW_OP_reg2
-	.quad	.Ltmp163-.Lfunc_begin1
-	.quad	.Ltmp195-.Lfunc_begin1
+	.quad	.Ltmp169-.Lfunc_begin1
+	.quad	.Ltmp208-.Lfunc_begin1
 	.short	1                               # Loc expr size
 	.byte	82                              # DW_OP_reg2
 	.quad	0
@@ -892,17 +908,17 @@ stack_buf:
 .Ldebug_loc14:
 	.quad	-1
 	.quad	.Lfunc_begin1                   #   base address
-	.quad	.Ltmp185-.Lfunc_begin1
-	.quad	.Ltmp191-.Lfunc_begin1
+	.quad	.Ltmp198-.Lfunc_begin1
+	.quad	.Ltmp204-.Lfunc_begin1
 	.short	1                               # Loc expr size
-	.byte	86                              # DW_OP_reg6
+	.byte	88                              # DW_OP_reg8
 	.quad	0
 	.quad	0
 .Ldebug_loc15:
 	.quad	-1
 	.quad	.Lfunc_begin1                   #   base address
-	.quad	.Ltmp188-.Lfunc_begin1
-	.quad	.Ltmp195-.Lfunc_begin1
+	.quad	.Ltmp201-.Lfunc_begin1
+	.quad	.Ltmp208-.Lfunc_begin1
 	.short	1                               # Loc expr size
 	.byte	89                              # DW_OP_reg9
 	.quad	0
@@ -1976,7 +1992,7 @@ stack_buf:
 	.byte	23                              # Abbrev [23] 0x518:0xe DW_TAG_variable
 	.byte	2                               # DW_AT_location
 	.byte	145
-	.byte	16
+	.byte	8
 	.long	.Linfo_string77                 # DW_AT_name
 	.byte	1                               # DW_AT_decl_file
 	.byte	133                             # DW_AT_decl_line
@@ -2025,12 +2041,12 @@ stack_buf:
 	.byte	0                               # End Of Children Mark
 	.byte	0                               # End Of Children Mark
 	.byte	26                              # Abbrev [26] 0x58d:0x1c DW_TAG_lexical_block
-	.quad	.Ltmp135                        # DW_AT_low_pc
-	.long	.Ltmp138-.Ltmp135               # DW_AT_high_pc
+	.quad	.Ltmp138                        # DW_AT_low_pc
+	.long	.Ltmp141-.Ltmp138               # DW_AT_high_pc
 	.byte	23                              # Abbrev [23] 0x59a:0xe DW_TAG_variable
 	.byte	2                               # DW_AT_location
 	.byte	145
-	.byte	16
+	.byte	8
 	.long	.Linfo_string77                 # DW_AT_name
 	.byte	1                               # DW_AT_decl_file
 	.byte	167                             # DW_AT_decl_line
@@ -2038,8 +2054,8 @@ stack_buf:
 	.byte	0                               # End Of Children Mark
 	.byte	36                              # Abbrev [36] 0x5a9:0x14 DW_TAG_inlined_subroutine
 	.long	1625                            # DW_AT_abstract_origin
-	.quad	.Ltmp138                        # DW_AT_low_pc
-	.long	.Ltmp149-.Ltmp138               # DW_AT_high_pc
+	.quad	.Ltmp141                        # DW_AT_low_pc
+	.long	.Ltmp152-.Ltmp141               # DW_AT_high_pc
 	.byte	1                               # DW_AT_call_file
 	.byte	168                             # DW_AT_call_line
 	.byte	9                               # DW_AT_call_column
@@ -2218,22 +2234,28 @@ stack_buf:
 .Ldebug_ranges2:
 	.quad	.Ltmp113
 	.quad	.Ltmp118
-	.quad	.Ltmp163
-	.quad	.Ltmp195
+	.quad	.Ltmp169
+	.quad	.Ltmp181
+	.quad	.Ltmp184
+	.quad	.Ltmp208
 	.quad	0
 	.quad	0
 .Ldebug_ranges3:
-	.quad	.Ltmp174
-	.quad	.Ltmp180
-	.quad	.Ltmp188
-	.quad	.Ltmp195
+	.quad	.Ltmp187
+	.quad	.Ltmp193
+	.quad	.Ltmp201
+	.quad	.Ltmp208
 	.quad	0
 	.quad	0
 .Ldebug_ranges4:
 	.quad	.Ltmp110
 	.quad	.Ltmp118
-	.quad	.Ltmp149
-	.quad	.Ltmp195
+	.quad	.Ltmp152
+	.quad	.Ltmp155
+	.quad	.Ltmp158
+	.quad	.Ltmp181
+	.quad	.Ltmp184
+	.quad	.Ltmp208
 	.quad	0
 	.quad	0
 .Ldebug_ranges5:
@@ -2424,7 +2446,7 @@ stack_buf:
 	.long	0
 	.long	928
 	.long	928
-	.long	1665
+	.long	1698
 	.long	0                               # BTF_KIND_PTR(id = 1)
 	.long	33554432                        # 0x2000000
 	.long	2
@@ -2577,7 +2599,7 @@ stack_buf:
 	.long	888                             # BTF_KIND_FUNC(id = 18)
 	.long	201326592                       # 0xc000000
 	.long	17
-	.long	1538                            # BTF_KIND_INT(id = 19)
+	.long	1571                            # BTF_KIND_INT(id = 19)
 	.long	16777216                        # 0x1000000
 	.long	1
 	.long	16777224                        # 0x1000008
@@ -2587,45 +2609,45 @@ stack_buf:
 	.long	19
 	.long	14
 	.long	13
-	.long	1543                            # BTF_KIND_VAR(id = 21)
+	.long	1576                            # BTF_KIND_VAR(id = 21)
 	.long	234881024                       # 0xe000000
 	.long	20
 	.long	1
-	.long	1551                            # BTF_KIND_VAR(id = 22)
+	.long	1584                            # BTF_KIND_VAR(id = 22)
 	.long	234881024                       # 0xe000000
 	.long	5
 	.long	1
-	.long	1558                            # BTF_KIND_STRUCT(id = 23)
+	.long	1591                            # BTF_KIND_STRUCT(id = 23)
 	.long	67108866                        # 0x4000002
 	.long	64
-	.long	1566
+	.long	1599
 	.long	24
 	.long	0                               # 0x0
-	.long	1572
+	.long	1605
 	.long	10
 	.long	320                             # 0x140
-	.long	1576                            # BTF_KIND_STRUCT(id = 24)
+	.long	1609                            # BTF_KIND_STRUCT(id = 24)
 	.long	67108866                        # 0x4000002
 	.long	40
-	.long	1587
+	.long	1620
 	.long	25
 	.long	0                               # 0x0
-	.long	1596
+	.long	1629
 	.long	10
 	.long	128                             # 0x80
-	.long	1608                            # BTF_KIND_STRUCT(id = 25)
+	.long	1641                            # BTF_KIND_STRUCT(id = 25)
 	.long	67108867                        # 0x4000003
 	.long	16
-	.long	1622
+	.long	1655
 	.long	5
 	.long	0                               # 0x0
-	.long	1627
+	.long	1660
 	.long	5
 	.long	32                              # 0x20
-	.long	1631
+	.long	1664
 	.long	8
 	.long	64                              # 0x40
-	.long	1638                            # BTF_KIND_VAR(id = 26)
+	.long	1671                            # BTF_KIND_VAR(id = 26)
 	.long	234881024                       # 0xe000000
 	.long	23
 	.long	1
@@ -2635,11 +2657,11 @@ stack_buf:
 	.long	12
 	.long	14
 	.long	200
-	.long	1642                            # BTF_KIND_VAR(id = 28)
+	.long	1675                            # BTF_KIND_VAR(id = 28)
 	.long	234881024                       # 0xe000000
 	.long	27
 	.long	1
-	.long	1652                            # BTF_KIND_DATASEC(id = 29)
+	.long	1685                            # BTF_KIND_DATASEC(id = 29)
 	.long	251658243                       # 0xf000003
 	.long	0
 	.long	22
@@ -2651,7 +2673,7 @@ stack_buf:
 	.long	28
 	.long	stack_buf
 	.long	200
-	.long	1657                            # BTF_KIND_DATASEC(id = 30)
+	.long	1690                            # BTF_KIND_DATASEC(id = 30)
 	.long	251658241                       # 0xf000001
 	.long	0
 	.long	21
@@ -2804,57 +2826,57 @@ stack_buf:
 	.byte	0
 	.ascii	"\t\tif (prog->ip >= prog->len) {" # string offset=1236
 	.byte	0
-	.ascii	"\tCHECK_PROG(p);"              # string offset=1267
+	.ascii	"\tif (ip >= (PROG_MAX_INSTR - 2)) { return 189; }" # string offset=1267
 	.byte	0
-	.ascii	"\tunsigned char ins = instr[ip];" # string offset=1283
+	.ascii	"\tunsigned char ins = instr[ip];" # string offset=1316
 	.byte	0
-	.ascii	"\tswitch (ins) {"              # string offset=1315
+	.ascii	"\tswitch (ins) {"              # string offset=1348
 	.byte	0
-	.ascii	"\tif (st->top > 1) return;"    # string offset=1331
+	.ascii	"\tif (st->top > 1) return;"    # string offset=1364
 	.byte	0
-	.ascii	"\t\t\timmediate = instr[ip+1];  // This gets rejected under -O2 but not under -O3." # string offset=1357
+	.ascii	"\t\t\timmediate = instr[ip+1];  // This gets rejected under -O2 but not under -O3." # string offset=1390
 	.byte	0
-	.ascii	"\t\t\tstack_push(st, ctx->fb + immediate);" # string offset=1437
+	.ascii	"\t\t\tstack_push(st, ctx->fb + immediate);" # string offset=1470
 	.byte	0
-	.ascii	"\tst->buf[st->top] = word;"    # string offset=1477
+	.ascii	"\tst->buf[st->top] = word;"    # string offset=1510
 	.byte	0
-	.ascii	"\tst->top++;"                  # string offset=1503
+	.ascii	"\tst->top++;"                  # string offset=1536
 	.byte	0
-	.ascii	"\t*res = stack_top(st);"       # string offset=1515
+	.ascii	"\t*res = stack_top(st);"       # string offset=1548
 	.byte	0
-	.ascii	"char"                          # string offset=1538
+	.ascii	"char"                          # string offset=1571
 	.byte	0
-	.ascii	"LICENSE"                       # string offset=1543
+	.ascii	"LICENSE"                       # string offset=1576
 	.byte	0
-	.ascii	"my_pid"                        # string offset=1551
+	.ascii	"my_pid"                        # string offset=1584
 	.byte	0
-	.ascii	"collect"                       # string offset=1558
+	.ascii	"collect"                       # string offset=1591
 	.byte	0
-	.ascii	"frame"                         # string offset=1566
+	.ascii	"frame"                         # string offset=1599
 	.byte	0
-	.ascii	"loc"                           # string offset=1572
+	.ascii	"loc"                           # string offset=1605
 	.byte	0
-	.ascii	"frame_spec"                    # string offset=1576
+	.ascii	"frame_spec"                    # string offset=1609
 	.byte	0
-	.ascii	"cfa_rule"                      # string offset=1587
+	.ascii	"cfa_rule"                      # string offset=1620
 	.byte	0
-	.ascii	"fb_loc_prog"                   # string offset=1596
+	.ascii	"fb_loc_prog"                   # string offset=1629
 	.byte	0
-	.ascii	"register_rule"                 # string offset=1608
+	.ascii	"register_rule"                 # string offset=1641
 	.byte	0
-	.ascii	"rule"                          # string offset=1622
+	.ascii	"rule"                          # string offset=1655
 	.byte	0
-	.ascii	"reg"                           # string offset=1627
+	.ascii	"reg"                           # string offset=1660
 	.byte	0
-	.ascii	"offset"                        # string offset=1631
+	.ascii	"offset"                        # string offset=1664
 	.byte	0
-	.ascii	"req"                           # string offset=1638
+	.ascii	"req"                           # string offset=1671
 	.byte	0
-	.ascii	"stack_buf"                     # string offset=1642
+	.ascii	"stack_buf"                     # string offset=1675
 	.byte	0
-	.ascii	".bss"                          # string offset=1652
+	.ascii	".bss"                          # string offset=1685
 	.byte	0
-	.ascii	"license"                       # string offset=1657
+	.ascii	"license"                       # string offset=1690
 	.byte	0
 	.section	.BTF.ext,"",@progbits
 	.short	60319                           # 0xeb9f
@@ -2864,8 +2886,8 @@ stack_buf:
 	.long	0
 	.long	36
 	.long	36
-	.long	1076
-	.long	1112
+	.long	1188
+	.long	1224
 	.long	0
 	.long	8                               # FuncInfo
 	.long	130                             # FuncInfo section string offset=130
@@ -3000,7 +3022,7 @@ stack_buf:
 	.long	736
 	.long	223234                          # Line 218 Col 2
 	.long	898                             # LineInfo section string offset=898
-	.long	36
+	.long	43
 	.long	.Lfunc_begin1
 	.long	150
 	.long	904
@@ -3047,101 +3069,129 @@ stack_buf:
 	.long	161820                          # Line 158 Col 28
 	.long	.Ltmp130
 	.long	150
+	.long	0
+	.long	0                               # Line 0 Col 0
+	.long	.Ltmp131
+	.long	150
 	.long	1106
 	.long	161798                          # Line 158 Col 6
-	.long	.Ltmp137
-	.long	150
-	.long	1140
-	.long	171010                          # Line 167 Col 2
-	.long	.Ltmp140
-	.long	150
-	.long	1179
-	.long	35850                           # Line 35 Col 10
-	.long	.Ltmp143
-	.long	150
-	.long	1179
-	.long	35846                           # Line 35 Col 6
-	.long	.Ltmp144
+	.long	.Ltmp134
 	.long	150
 	.long	0
 	.long	0                               # Line 0 Col 0
-	.long	.Ltmp145
+	.long	.Ltmp135
+	.long	150
+	.long	1106
+	.long	161798                          # Line 158 Col 6
+	.long	.Ltmp140
+	.long	150
+	.long	1140
+	.long	171010                          # Line 167 Col 2
+	.long	.Ltmp143
+	.long	150
+	.long	1179
+	.long	35850                           # Line 35 Col 10
+	.long	.Ltmp146
 	.long	150
 	.long	1179
 	.long	35846                           # Line 35 Col 6
+	.long	.Ltmp147
+	.long	150
+	.long	0
+	.long	0                               # Line 0 Col 0
 	.long	.Ltmp148
+	.long	150
+	.long	1179
+	.long	35846                           # Line 35 Col 6
+	.long	.Ltmp151
 	.long	150
 	.long	1208
 	.long	37897                           # Line 37 Col 9
-	.long	.Ltmp151
-	.long	150
-	.long	1031
-	.long	144387                          # Line 141 Col 3
 	.long	.Ltmp154
 	.long	150
 	.long	1031
 	.long	144387                          # Line 141 Col 3
 	.long	.Ltmp157
 	.long	150
+	.long	0
+	.long	0                               # Line 0 Col 0
+	.long	.Ltmp160
+	.long	150
+	.long	1031
+	.long	144387                          # Line 141 Col 3
+	.long	.Ltmp163
+	.long	150
 	.long	1236
 	.long	145433                          # Line 142 Col 25
-	.long	.Ltmp160
+	.long	.Ltmp166
 	.long	150
 	.long	1236
 	.long	145415                          # Line 142 Col 7
-	.long	.Ltmp165
-	.long	150
-	.long	1267
-	.long	87042                           # Line 85 Col 2
-	.long	.Ltmp168
-	.long	150
-	.long	1283
-	.long	92182                           # Line 90 Col 22
 	.long	.Ltmp171
 	.long	150
-	.long	1315
+	.long	1267
+	.long	90121                           # Line 88 Col 9
+	.long	.Ltmp174
+	.long	150
+	.long	1267
+	.long	90118                           # Line 88 Col 6
+	.long	.Ltmp177
+	.long	150
+	.long	1316
+	.long	92182                           # Line 90 Col 22
+	.long	.Ltmp180
+	.long	150
+	.long	1348
 	.long	93186                           # Line 91 Col 2
-	.long	.Ltmp176
-	.long	150
-	.long	1331
-	.long	43022                           # Line 42 Col 14
-	.long	.Ltmp179
-	.long	150
-	.long	1331
-	.long	43014                           # Line 42 Col 6
-	.long	.Ltmp182
-	.long	150
-	.long	1357
-	.long	97304                           # Line 95 Col 24
 	.long	.Ltmp183
 	.long	150
-	.long	1357
+	.long	0
+	.long	0                               # Line 0 Col 0
+	.long	.Ltmp186
+	.long	150
+	.long	1348
+	.long	93186                           # Line 91 Col 2
+	.long	.Ltmp189
+	.long	150
+	.long	1364
+	.long	43022                           # Line 42 Col 14
+	.long	.Ltmp192
+	.long	150
+	.long	1364
+	.long	43014                           # Line 42 Col 6
+	.long	.Ltmp195
+	.long	150
+	.long	1390
+	.long	97304                           # Line 95 Col 24
+	.long	.Ltmp196
+	.long	150
+	.long	1390
 	.long	97296                           # Line 95 Col 16
-	.long	.Ltmp184
-	.long	150
-	.long	1437
-	.long	99352                           # Line 97 Col 24
-	.long	.Ltmp187
-	.long	150
-	.long	1437
-	.long	99355                           # Line 97 Col 27
-	.long	.Ltmp190
-	.long	150
-	.long	1477
-	.long	44034                           # Line 43 Col 2
-	.long	.Ltmp193
-	.long	150
-	.long	1477
-	.long	44051                           # Line 43 Col 19
-	.long	.Ltmp194
-	.long	150
-	.long	1503
-	.long	45065                           # Line 44 Col 9
 	.long	.Ltmp197
 	.long	150
-	.long	1515
-	.long	172039                          # Line 168 Col 7
+	.long	1470
+	.long	99352                           # Line 97 Col 24
 	.long	.Ltmp200
+	.long	150
+	.long	1470
+	.long	99355                           # Line 97 Col 27
+	.long	.Ltmp203
+	.long	150
+	.long	1510
+	.long	44034                           # Line 43 Col 2
+	.long	.Ltmp206
+	.long	150
+	.long	1510
+	.long	44051                           # Line 43 Col 19
+	.long	.Ltmp207
+	.long	150
+	.long	1536
+	.long	45065                           # Line 44 Col 9
+	.long	.Ltmp210
+	.long	150
+	.long	1548
+	.long	172039                          # Line 168 Col 7
+	.long	.Ltmp213
 	.long	150
 	.long	594
 	.long	174081                          # Line 170 Col 1
