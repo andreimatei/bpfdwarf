@@ -4,6 +4,7 @@
 #include <argp.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <time.h>
 #include <bpf/libbpf.h>
 #include "probe.bpf.h"
 #include "probe.skel.h"
@@ -81,7 +82,25 @@ static void bump_memlock_rlimit(void) {
     }
 }
 
+static int handle_event(void *ctx, void *data, size_t data_sz) {
+	const struct event *e = data;
+	struct tm *tm;
+	char ts[32];
+	time_t t;
+
+	time(&t);
+	tm = localtime(&t);
+	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
+
+	printf("%-5s %02x %02x %02x %02x",
+			ts, e->bytes[0], e->bytes[1], e->bytes[2], e->bytes[3]);
+	printf("\n");
+
+	return 0;
+}
+
 int main(int argc, char **argv) {
+	struct ring_buffer *rb = NULL;
 	int err;
 
 	// Parse command line arguments.
@@ -130,15 +149,36 @@ int main(int argc, char **argv) {
 
 	skel->links.probe = uprobe_link;
 
+	/* Set up ring buffer polling */
+	rb = ring_buffer__new(bpf_map__fd(skel->maps.out_buf), handle_event, NULL, NULL);
+	if (!rb) {
+		err = -1;
+		fprintf(stderr, "Failed to create ring buffer\n");
+		goto cleanup;
+	}
+
 	printf("Successfully attached!\n");
 
 	for (;;) {
-		// Trigger our BPF program.
-		fprintf(stderr, ".");
-		sleep(1);
+		err = ring_buffer__poll(rb, 100 /* timeout, ms */);
+		/* Ctrl-C will cause -EINTR */
+		if (err == -EINTR) {
+			err = 0;
+			break;
+		}
+		if (err < 0) {
+			printf("Error polling perf buffer: %d\n", err);
+			break;
+		}
+
+
+		// // Trigger our BPF program.
+		// fprintf(stderr, ".");
+		// sleep(1);
 	}
 
 cleanup:
+	ring_buffer__free(rb);
 	probe_bpf__destroy(skel);
 	return -err;
 }

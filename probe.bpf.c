@@ -13,6 +13,12 @@ int my_pid = 0;
 
 struct collect req;
 
+struct {
+	__uint(type, BPF_MAP_TYPE_RINGBUF);
+	// The size is in bytes.
+	__uint(max_entries, 256 * 1024);
+} out_buf SEC(".maps");
+
 typedef unsigned char byte;
 
 struct exec_ctx {
@@ -185,6 +191,7 @@ int probe(struct pt_regs* regs) {
 		bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
 		bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
 	}
+	bpf_ringbuf_output(&out_buf, buf, 10 /* size */, 0 /* flags */);
 
 	return 0;
 }

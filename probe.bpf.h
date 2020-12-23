@@ -67,4 +67,10 @@ struct collect {
   struct loc_prog loc;
 };
 
+#define MAX_EVENT_BYTES 100
+
+struct event {
+  unsigned char bytes[MAX_EVENT_BYTES];
+};
+
 #endif //PROBE_BPF_H
