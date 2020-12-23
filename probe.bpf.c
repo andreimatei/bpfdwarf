@@ -106,8 +106,11 @@ unsigned char stack_buf[200];
 static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	bpf_printk("executing program");
 	struct stack* st = (struct stack*)stack_buf;
-	st->top = 0;  // reset the stack
+
+	// Reset all the state modified by prior execution.
+	st->top = 0;
 	prog->ip = 0;
+
 	int i;
 	int ok;
 	for (i = 0; i < 10; i++) {
@@ -116,34 +119,12 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 			break;
 		}
 		if (ip > 10) return 1;
-		// !!! if ((x == 0) || (x == 1)) {
-			// switch (prog->instr[ip]) {
-			// 	case DW_OP_CALL_FRAME_CFA:
-			// 		// stack_push(st, ctx->cfa);
-			// 		//p->ip++;
-			// 		return 0;
-			// 	case DW_OP_FBREG:
-			// 		// TODO(andrei): Deal with SLEB decoding.
-			// 		// stack_push(st, ctx->fb + p->instr[p->ip+1]);
-			// 		prog->ip += 2;
-			// 		return 0;
-			// }
-
-
-
 			ok = exec_one(prog, ctx, st);
 			if (ok != 0) {
 				return ok;
 			}
 
 	}
-	// !!!
-	// while (prog->ip <	prog->len) {
-	// 	int ok = exec_one(prog, ctx, st);
-	// 	if (ok != 0) {
-	// 		return ok;
-	// 	}
-	// }
 
 	if (prog->ip != prog->len) {
 		// programming error
@@ -159,17 +140,7 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	return 0;
 }
 
-// !!!
-static int xxx() {
-	struct stack* st = (struct stack*)stack_buf;
-	if (st->top == 0) {
-		return 2;
-	}
-	return 1;
-}
-
 // int bpf_probe_read_user(void *dst, u32 size, const void *unsafe_ptr)
-
 
 SEC("uprobe/trigger_func")
 int probe(struct pt_regs* regs) {
@@ -197,10 +168,15 @@ int probe(struct pt_regs* regs) {
 		return status;
 	}
 
+	bpf_printk("!!! executing loc prog");
+	long loc;
+	status = exec_prog(&loc, &req.loc, &ctx);
+	if (status != 0) {
+		return status;
+	}
+	bpf_printk("!!! computed loc: 0x%x", loc);
 
-	/*
-	bpf_printk("CFA: 0x%x", cfa);
-	int rok = bpf_probe_read_user(buf, 20, (void*)cfa);
+	int rok = bpf_probe_read_user(buf, 20, (void*)loc);
 	if (rok != 0) {
 		bpf_printk("error reading memory");
 	} else {
@@ -209,15 +185,7 @@ int probe(struct pt_regs* regs) {
 		bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
 		bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
 	}
-	*/
 
-	bpf_printk("!!! executing loc prog");
-	long loc;
-	status = exec_prog(&loc, &req.loc, &ctx);
-	if (status != 0) {
-		return status;
-	}
-	bpf_printk("!!! computed loc: 0x%x", loc);
 	return 0;
 }
 

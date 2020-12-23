@@ -109,7 +109,11 @@ int main(int argc, char **argv) {
 		.rule = RULE_FRAME_POINTER, .reg = REG_SP, .offset = 8
 	};
 	skel->bss->req.frame.fb_loc_prog = (struct loc_prog){.len = 1, .instr = {0x9c}};
-	skel->bss->req.loc= (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
+	// for app.go:main.myfunc:b :
+	// skel->bss->req.loc= (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
+
+	// for app.go:main.myfunc:x :
+	skel->bss->req.loc= (struct loc_prog){.len = 1, .instr = {0x9c}};
 
 	// Attach uprobe handler.
 	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(
