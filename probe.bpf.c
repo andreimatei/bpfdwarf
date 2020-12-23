@@ -146,12 +146,12 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	return 0;
 }
 
-// int bpf_probe_read_user(void *dst, u32 size, const void *unsafe_ptr)
+#define MAX_SIZE 20
 
 SEC("uprobe/trigger_func")
 int probe(struct pt_regs* regs) {
 	struct exec_ctx ctx;
-	byte buf[20];
+	byte buf[MAX_SIZE];
 	int pid = bpf_get_current_pid_tgid() >> 32;
 	int match= (pid != my_pid);
 	bpf_printk("\n");
@@ -191,8 +191,10 @@ int probe(struct pt_regs* regs) {
 		bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
 		bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
 	}
-	bpf_ringbuf_output(&out_buf, buf, 10 /* size */, 0 /* flags */);
+	if (req.sz > MAX_SIZE) {
+		req.sz = MAX_SIZE;
+	}
+	bpf_ringbuf_output(&out_buf, buf, req.sz, 0 /* flags */);
 
 	return 0;
 }
-

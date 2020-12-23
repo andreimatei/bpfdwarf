@@ -65,12 +65,9 @@ struct frame_spec {
 struct collect {
 	struct frame_spec frame;
   struct loc_prog loc;
-};
-
-#define MAX_EVENT_BYTES 100
-
-struct event {
-  unsigned char bytes[MAX_EVENT_BYTES];
+  // sz indicates how many bytes will be copied from the location
+  // indicated by loc.
+  size_t sz;
 };
 
 #endif //PROBE_BPF_H

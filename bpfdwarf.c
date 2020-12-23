@@ -82,18 +82,21 @@ static void bump_memlock_rlimit(void) {
     }
 }
 
+typedef unsigned char byte;
+
 static int handle_event(void *ctx, void *data, size_t data_sz) {
-	const struct event *e = data;
 	struct tm *tm;
 	char ts[32];
 	time_t t;
+	const byte* const buf = data;
+
 
 	time(&t);
 	tm = localtime(&t);
 	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
 
-	printf("%-5s %02x %02x %02x %02x",
-			ts, e->bytes[0], e->bytes[1], e->bytes[2], e->bytes[3]);
+	printf("%-5s (%ld bytes) %02x %02x %02x %02x",
+			ts, data_sz, buf[0], buf[1], buf[2], buf[3]);
 	printf("\n");
 
 	return 0;
@@ -133,6 +136,7 @@ int main(int argc, char **argv) {
 
 	// for app.go:main.myfunc:x :
 	skel->bss->req.loc= (struct loc_prog){.len = 1, .instr = {0x9c}};
+	skel->bss->req.sz = 8;
 
 	// Attach uprobe handler.
 	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(
@@ -170,11 +174,6 @@ int main(int argc, char **argv) {
 			printf("Error polling perf buffer: %d\n", err);
 			break;
 		}
-
-
-		// // Trigger our BPF program.
-		// fprintf(stderr, ".");
-		// sleep(1);
 	}
 
 cleanup:
