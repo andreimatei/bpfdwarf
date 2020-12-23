@@ -1,6 +1,8 @@
 #ifndef PROBE_BPF_H
 #define PROBE_BPF_H
 
+#include <stddef.h>
+
 typedef int dwreg;
 
 // registers used by instructions.
@@ -33,12 +35,18 @@ struct register_rule {
 };
 
 #define PROG_MAX_INSTR 10
+// MAX_IMMEDIATE_BYTES acts as a buffer at the end of loc_prog.instr, ensuring
+// that CHECK_PROG is sufficient for allowing the arguments of the last
+// instruction to be safely accessed.
+#define MAX_IMMEDIATE_BYTES 10
 
 struct loc_prog {
-  unsigned char instr[PROG_MAX_INSTR];
-  int len; // len is number of bytes in instr.
-  unsigned int ip;  // ip points to the next instruction to execute.
+  unsigned char instr[PROG_MAX_INSTR + MAX_IMMEDIATE_BYTES];
+  size_t len; // len is number of bytes in instr
+  size_t ip;  // ip points to the next instruction to execute.
 };
+
+#define CHECK_PROG(p) if (p->ip >= PROG_MAX_INSTR) return 1;
 
 struct frame_spec {
   // cfa_rule specifies how the Canonical Frame Address is to be computed. Note

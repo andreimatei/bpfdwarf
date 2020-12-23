@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <linux/bpf.h>
 #include <linux/ptrace.h>
 #include <bpf/bpf_helpers.h>
@@ -16,42 +17,56 @@ typedef unsigned char byte;
 
 struct exec_ctx {
 	struct pt_regs* regs;
-
 	long cfa;  // Canonical Frame Address
 	long fb;   // frame base register
+	// !!! without this padding I get "invalid read from stack off..."
+	int pad;
+
 };
 
 #define STACK_MAX_WORDS 10
 
+//#pragma pack(4)
 struct stack {
-	long buf[STACK_MAX_WORDS];
-	int top;  // top points to the first empty word
+	size_t top;  // top points to the first empty word
+	long buf[STACK_MAX_WORDS + 10];
 };
 
+
+#define CHECK_STACK(st) if (st->top >= STACK_MAX_WORDS) return 1;
+
 static long stack_top(struct stack* st) {
+	CHECK_STACK(st);
+	// TODO(andrei): assert top > 0
 	return st->buf[st->top-1];
 }
 
-// TODO(andrei): Deal with stack overflow.
-static void stack_push(struct stack* st, long word) {
+static int stack_push(struct stack* st, long word) {
+	CHECK_STACK(st);
+	size_t top = st->top;
+	long* topp = st->buf + top;
 	st->buf[st->top] = word;
 	st->top++;
+	return 0;
 }
 
 // Execute one instruction. Returns how many bytes were consumed from instr.
 // Returns 0 on success.
 static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
-	if (p->ip > 10) {
-		return 1;  // !!!
-	}
-	switch (p->instr[p->ip]) {
+	CHECK_PROG(p);
+	size_t ip = p->ip;
+	switch (p->instr[ip]) {
 		case DW_OP_CALL_FRAME_CFA:
-			// stack_push(st, ctx->cfa);
-			//p->ip++;
+			if (stack_push(st, ctx->cfa)) {
+				return 1;
+			}
+			p->ip++;
 			return 0;
 		case DW_OP_FBREG:
 			// TODO(andrei): Deal with SLEB decoding.
-			// stack_push(st, ctx->fb + p->instr[p->ip+1]);
+			if (stack_push(st, ctx->fb + p->instr[ip+1])) {
+				return 1;
+			}
 			p->ip += 2;
 			return 0;
 	}
@@ -171,13 +186,13 @@ int probe(struct pt_regs* regs) {
 		ctx.cfa = cfa;
 	}
 	// Compute framebase.
+	bpf_printk("!!! executing fb prog...");
 	int status;
-	/*
 	status = exec_prog(&ctx.fb, &req.frame.fb_loc_prog, &ctx);
 	if (status != 0) {
+		//bpf_printk("!!! executing fb prog... err: %d", status);
 		return status;
 	}
-	*/
 
 
 	/*
@@ -193,22 +208,13 @@ int probe(struct pt_regs* regs) {
 	}
 	*/
 
+	bpf_printk("!!! executing loc prog");
 	long loc;
-	int status2 = exec_prog(&loc, &req.loc, &ctx);
-	//int x = xxx();
-	//bpf_printk("!!! x = %d", x);
-
-	bpf_printk("!!! loc: 0x%x", loc);
-	// !!!
-	if (status2 != 0) {
-		if (status2 == 2) {
-			//bpf_printk("!!! loc: 0x%x", loc);
-			return 2;
-		}
-		return 1;
+	status = exec_prog(&loc, &req.loc, &ctx);
+	if (status != 0) {
+		return status;
 	}
-	// bpf_printk("computed location: 0x%x", loc);
-
-	return 1;
+	bpf_printk("!!! computed loc: 0x%x", loc);
+	return 0;
 }
 
