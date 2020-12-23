@@ -20,8 +20,7 @@ struct exec_ctx {
 	long cfa;  // Canonical Frame Address
 	long fb;   // frame base register
 	// !!! without this padding I get "invalid read from stack off..."
-	int pad;
-
+	int pad,pad2,pad3;
 };
 
 #define STACK_MAX_WORDS 10
@@ -30,6 +29,7 @@ struct exec_ctx {
 struct stack {
 	size_t top;  // top points to the first empty word
 	long buf[STACK_MAX_WORDS + 10];
+	int pad;  // !!! not necessary?
 };
 
 
@@ -53,24 +53,26 @@ static int stack_push(struct stack* st, long word) {
 // Execute one instruction. Returns how many bytes were consumed from instr.
 // Returns 0 on success.
 static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) {
+	bpf_printk("!!! exec_one 1");
 	CHECK_PROG(p);
 	size_t ip = p->ip;
+	long fb = ctx->fb;
 	switch (p->instr[ip]) {
 		case DW_OP_CALL_FRAME_CFA:
 			if (stack_push(st, ctx->cfa)) {
-				return 1;
+				return 5;
 			}
 			p->ip++;
 			return 0;
 		case DW_OP_FBREG:
 			// TODO(andrei): Deal with SLEB decoding.
-			if (stack_push(st, ctx->fb + p->instr[ip+1])) {
-				return 1;
+			if (stack_push(st, fb + p->instr[ip+1])) {
+				return 6;
 			}
 			p->ip += 2;
 			return 0;
 	}
-	return 1;
+	return 4;
 }
 
 static long reg_value(dwreg reg, struct pt_regs* ctx) {
@@ -104,7 +106,8 @@ unsigned char stack_buf[200];
 static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	bpf_printk("executing program");
 	struct stack* st = (struct stack*)stack_buf;
-	st->top = 0;
+	st->top = 0;  // reset the stack
+	prog->ip = 0;
 	int i;
 	int ok;
 	for (i = 0; i < 10; i++) {
@@ -142,14 +145,14 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 	// 	}
 	// }
 
-	if (prog->ip != prog->len + 1) {
+	if (prog->ip != prog->len) {
 		// programming error
-		return 1;
+		return 7;
 	}
 	if (st->top == 0) {
 		// programming error
 		// bpf_printk("aaa");
-		return 1;  // fails if I turn this to return 2
+		return 8;  // fails if I turn this to return 2
 	}
 	bpf_printk("returning from program");
 	*res = stack_top(st);
@@ -190,7 +193,7 @@ int probe(struct pt_regs* regs) {
 	int status;
 	status = exec_prog(&ctx.fb, &req.frame.fb_loc_prog, &ctx);
 	if (status != 0) {
-		//bpf_printk("!!! executing fb prog... err: %d", status);
+		bpf_printk("!!! executing fb prog... err: %d", status);
 		return status;
 	}
 

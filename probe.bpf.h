@@ -46,7 +46,7 @@ struct loc_prog {
   size_t ip;  // ip points to the next instruction to execute.
 };
 
-#define CHECK_PROG(p) if (p->ip >= PROG_MAX_INSTR) return 1;
+#define CHECK_PROG(p) if (p->ip >= PROG_MAX_INSTR) return 3;
 
 struct frame_spec {
   // cfa_rule specifies how the Canonical Frame Address is to be computed. Note
