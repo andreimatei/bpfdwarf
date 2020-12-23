@@ -1,8 +1,10 @@
 OUTPUT := output
 CLANG ?= clang
+OPT ?= -O2
 LLVM_STRIP ?= llvm-strip
+BPF_STRIP ?= 1
 BPFTOOL ?= tools/bpftool
-LIBBPF_SRC := $(abspath ../libbpf/src)
+LIBBPF_SRC ?= $(abspath ../libbpf/src)
 LIBBPF_OBJ := $(abspath $(OUTPUT)/libbpf.a)
 INCLUDES := -I$(OUTPUT)
 CFLAGS := -g -Wall
@@ -49,8 +51,11 @@ $(LIBBPF_OBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(OUTPU
 # Build BPF code
 $(OUTPUT)/probe.bpf.o: probe.bpf.c $(LIBBPF_OBJ) $(wildcard %.h) | $(OUTPUT)
 	$(call msg,BPF,$@)
-	$(Q)$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
+	$(Q)$(CLANG) -g $(OPT) -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
+ifeq ($(BPF_STRIP),1)
 	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
+else
+endif
 
 # Generate BPF skeletons
 $(OUTPUT)/probe.skel.h: $(OUTPUT)/probe.bpf.o | $(OUTPUT)
