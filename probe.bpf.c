@@ -29,6 +29,40 @@ struct exec_ctx {
 	int pad,pad2,pad3;
 };
 
+struct xx {
+	byte* buf;
+};
+
+// With a higher limit, the verifier barfs because of the state limit.
+#define MAX_SLEB128_LEN 7
+
+// DecodeSLEB128 decodes a signed Little Endian Base 128
+// represented number.
+static long decodeSLEB128(byte buf[MAX_SLEB128_LEN]) {
+	byte b;
+	long res = 0, shift = 0, len = 0;
+
+	int i;
+	for (i = 0; i < MAX_SLEB128_LEN; i++) {
+		b = buf[i];
+		len++;
+
+		res |= ((b & 0x7f) << shift);
+		shift += 7;
+		if ((b & 0x80) == 0) {
+			break;
+		}
+	}
+
+	if ((shift < 8 * len) && ((b & 0x40) > 0)) {
+		res |= -(1 << shift);
+	}
+	//bpf_printk("byte: 0x%x shift: %d, len: %d", b, shift, len);
+
+	return res;
+}
+
+
 #define STACK_MAX_WORDS 10
 
 //#pragma pack(4)
@@ -63,6 +97,8 @@ static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) 
 	CHECK_PROG(p);
 	size_t ip = p->ip;
 	long fb = ctx->fb;
+	long arg;
+	//struct xx x;
 	switch (p->instr[ip]) {
 		case DW_OP_CALL_FRAME_CFA:
 			if (stack_push(st, ctx->cfa)) {
@@ -71,8 +107,9 @@ static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) 
 			p->ip++;
 			return 0;
 		case DW_OP_FBREG:
-			// TODO(andrei): Deal with SLEB decoding.
-			if (stack_push(st, fb + p->instr[ip+1])) {
+			arg = decodeSLEB128(p->instr + ip + 1);
+			bpf_printk("arg for DW_OP_FBREG: %d", arg);
+			if (stack_push(st, fb + arg)) {
 				return 6;
 			}
 			p->ip += 2;

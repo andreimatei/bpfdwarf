@@ -140,9 +140,9 @@ int main(int argc, char **argv) {
 
 	// for app.go:main.myfunc:x :
 	skel->bss->req.num_progs = 2;
-	skel->bss->req.loc[0] = (struct loc_prog){.len = 1, .instr = {0x9c}};
+	skel->bss->req.loc[0] = (struct loc_prog){.len = 1, .instr = {0x9c, 0x00}};
 	skel->bss->req.sz[0] = 8;
-	skel->bss->req.loc[1] = (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
+	skel->bss->req.loc[1] = (struct loc_prog){.len = 2, .instr = {0x91, 0x08, 0x00}};
 	skel->bss->req.sz[1] = 10;
 
 	// Attach uprobe handler.
