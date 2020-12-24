@@ -62,12 +62,19 @@ struct frame_spec {
 	struct loc_prog fb_loc_prog;
 };
 
+#define MAX_VARIABLES 10
+
 struct collect {
 	struct frame_spec frame;
-  struct loc_prog loc;
+  size_t num_progs;
+  struct loc_prog loc[MAX_VARIABLES];
   // sz indicates how many bytes will be copied from the location
   // indicated by loc.
-  size_t sz;
+  size_t sz[MAX_VARIABLES];
 };
+
+
+#define BUF_SZ ((2<<6)-1)
+typedef unsigned char buffer[BUF_SZ];
 
 #endif //PROBE_BPF_H

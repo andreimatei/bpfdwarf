@@ -148,10 +148,48 @@ static int exec_prog(long* res, struct loc_prog* prog, struct exec_ctx* ctx) {
 
 #define MAX_SIZE 20
 
+void combine(byte* b1, byte* b2, size_t start, size_t s1) {
+	size_t c = 0;
+	size_t i;
+	size_t x;
+	s1 &= BUF_SZ;
+	for (i = 0; i < s1; i++) {
+		x = i+start;
+		// if (x >= 10) break;
+		x &= BUF_SZ;
+		i &= BUF_SZ;
+		b1[x] = b2[i];
+	}
+}
+
+
+buffer gbuf, gbuf2;
+
 SEC("uprobe/trigger_func")
 int probe(struct pt_regs* regs) {
 	struct exec_ctx ctx;
 	byte buf[MAX_SIZE];
+	// byte buf2[MAX_SIZE];
+
+	// buffer b,b2;
+
+
+	// //bpf_probe_read_user(b2, 10, (void*)10);
+
+	// //memset(b, '', 10);
+	// int ii;
+	// for (ii = 0; ii < BUF_SZ; ii++) {
+	// 	b[ii] = 0;
+	// }
+
+	// b[req.sz[0] & 0xff] = 1;
+	// bpf_printk("%d", b[b2[0]]);
+
+	// size_t j;
+	// for (j = 0; j < MAX_SIZE; j++) {
+	// 	buf[j] = 0xff;
+	// 	buf2[j] = 0xff;
+	// }
 	int pid = bpf_get_current_pid_tgid() >> 32;
 	int match= (pid != my_pid);
 	bpf_printk("\n");
@@ -174,27 +212,65 @@ int probe(struct pt_regs* regs) {
 		return status;
 	}
 
-	bpf_printk("!!! executing loc prog");
-	long loc;
-	status = exec_prog(&loc, &req.loc, &ctx);
-	if (status != 0) {
-		return status;
+	if (req.num_progs > MAX_VARIABLES) {
+		return 1;
 	}
-	bpf_printk("!!! computed loc: 0x%x", loc);
+	size_t i;
+	size_t bytes_read = 0;
+	for (i = 0; i < MAX_VARIABLES; i++) {
+		if (i > 0 && i == req.num_progs) {
+			break;
+		}
+		bpf_printk("!!! executing loc prog");
+		long loc;
+		struct loc_prog* prog = &req.loc[i];  // !!!
+		size_t sz = req.sz[i];
+		status = exec_prog(&loc, prog, &ctx);
+		if (status != 0) {
+			bpf_printk("!!! prog failed: %d", status);
+			return status;
+		}
+		bpf_printk("!!! computed loc: 0x%x", loc);
 
-	int rok = bpf_probe_read_user(buf, 20, (void*)loc);
-	if (rok != 0) {
-		bpf_printk("error reading memory");
-	} else {
-		bpf_printk("stack mem: %x %x %x", buf[0], buf[1], buf[2]);
-		bpf_printk("stack mem: %x %x %x", buf[3], buf[4], buf[5]);
-		bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
-		bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
+		// !!! 20
+		if (sz > MAX_SIZE) {
+			sz = MAX_SIZE;
+			//break;
+		}
+
+		int rok = bpf_probe_read_user(gbuf2, sz, (void*)loc);
+		if (rok != 0) {
+			bpf_printk("error reading memory");
+		} else {
+			bpf_printk("stack mem: %x %x %x", buf[0], buf[1], buf[2]);
+			bpf_printk("stack mem: %x %x %x", buf[3], buf[4], buf[5]);
+			bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
+			bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
+		}
+
+		// size_t k;
+		// size_t l;
+		// for (k = 0; k < 2; k++) {
+		// 	if (k == sz) {
+		// 		break;
+		// 	}
+		// 	l = k + bytes_read;
+		// 	//buf[l] = buf2[k];
+		// 	if (l < 10) {
+		// 		buf[l] = 0x22;
+		// 	}
+		// }
+
+		combine(gbuf, gbuf2, bytes_read, req.sz[0]);
+		bytes_read += sz;
 	}
-	if (req.sz > MAX_SIZE) {
-		req.sz = MAX_SIZE;
+
+
+	if (bytes_read > MAX_SIZE) {
+		bytes_read = MAX_SIZE;
 	}
-	bpf_ringbuf_output(&out_buf, buf, req.sz, 0 /* flags */);
+	bpf_printk("!!! output");
+	bpf_ringbuf_output(&out_buf, gbuf, bytes_read, 0 /* flags */);
 
 	return 0;
 }

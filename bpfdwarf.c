@@ -95,8 +95,12 @@ static int handle_event(void *ctx, void *data, size_t data_sz) {
 	tm = localtime(&t);
 	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
 
-	printf("%-5s (%ld bytes) %02x %02x %02x %02x",
-			ts, data_sz, buf[0], buf[1], buf[2], buf[3]);
+	printf("%-5s (%ld bytes) %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+			ts, data_sz,
+			buf[0], buf[1], buf[2], buf[3],
+			buf[4], buf[5], buf[6], buf[7],
+			buf[8], buf[9], buf[10], buf[11],
+			buf[12]);
 	printf("\n");
 
 	return 0;
@@ -135,8 +139,11 @@ int main(int argc, char **argv) {
 	// skel->bss->req.loc= (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
 
 	// for app.go:main.myfunc:x :
-	skel->bss->req.loc= (struct loc_prog){.len = 1, .instr = {0x9c}};
-	skel->bss->req.sz = 8;
+	skel->bss->req.num_progs = 2;
+	skel->bss->req.loc[0] = (struct loc_prog){.len = 1, .instr = {0x9c}};
+	skel->bss->req.sz[0] = 8;
+	skel->bss->req.loc[1] = (struct loc_prog){.len = 2, .instr = {0x91, 0x08}};
+	skel->bss->req.sz[1] = 10;
 
 	// Attach uprobe handler.
 	struct bpf_link* uprobe_link = bpf_program__attach_uprobe(
