@@ -20,6 +20,8 @@ enum instructions {
 
 // rules for recovering registers when unwinding the stack.
 enum rules {
+  // Value is stored at address rule.Reg + rule.Offset.
+  RULE_CFA = 0x08,
   // Value is stored at address rule.Reg + rule.Offset, but only if it's less
   // than the current CFA, otherwise same value.
   RULE_FRAME_POINTER = 0x09,
@@ -71,10 +73,12 @@ struct collect {
   // sz indicates how many bytes will be copied from the location
   // indicated by loc.
   size_t sz[MAX_VARIABLES];
+
+  long deref[MAX_VARIABLES];
 };
 
 
-#define BUF_SZ ((2<<6)-1)
+#define BUF_SZ ((2<<5)-1)
 typedef unsigned char buffer[BUF_SZ];
 
 #endif //PROBE_BPF_H

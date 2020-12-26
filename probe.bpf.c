@@ -36,7 +36,7 @@ struct xx {
 // With a higher limit, the verifier barfs because of the state limit.
 #define MAX_SLEB128_LEN 7
 
-// DecodeSLEB128 decodes a signed Little Endian Base 128
+// decodeSLEB128 decodes a signed Little Endian Base 128
 // represented number.
 static long decodeSLEB128(byte buf[MAX_SLEB128_LEN]) {
 	byte b;
@@ -112,7 +112,7 @@ static int exec_one(struct loc_prog* p, struct exec_ctx* ctx, struct stack* st) 
 			if (stack_push(st, fb + arg)) {
 				return 6;
 			}
-			p->ip += 2;
+			p->ip += 3;  // !!! get len from decode()
 			return 0;
 	}
 	return 4;
@@ -133,9 +133,18 @@ typedef unsigned char byte;
 static long calc_cfa(struct register_rule rule, struct pt_regs* ctx) {
 	long rr;
 	switch (rule.rule) {
+		case RULE_CFA:
+			return reg_value(rule.reg, ctx) + rule.offset;
 		case RULE_FRAME_POINTER:
-			rr = reg_value(rule.reg, ctx);
+			//rr = reg_value(rule.reg, ctx);
 			// bpf_printk("sp: 0x%x (offset %d)", rr, rule.offset);
+
+			// !!! delve has this extra logic:
+			/*
+			if curReg.Uint64Val <= uint64(cfa) {
+				return it.readRegisterAt(regnum, curReg.Uint64Val)
+			}
+			*/
 			return reg_value(rule.reg, ctx) + rule.offset;
 	}
 	return 0;
@@ -237,9 +246,9 @@ int probe(struct pt_regs* regs) {
 	if (cfa == 0) {
 		bpf_printk("failed to compute CFA");
 		return 1;
-	} else {
-		ctx.cfa = cfa;
 	}
+	ctx.cfa = cfa;
+	bpf_printk("CFA: 0x%llx", cfa);
 	// Compute framebase.
 	bpf_printk("!!! executing fb prog...");
 	int status;
@@ -248,6 +257,7 @@ int probe(struct pt_regs* regs) {
 		bpf_printk("!!! executing fb prog... err: %d", status);
 		return status;
 	}
+	bpf_printk("framebase: 0x%llx", ctx.fb);
 
 	if (req.num_progs > MAX_VARIABLES) {
 		return 1;
@@ -279,11 +289,29 @@ int probe(struct pt_regs* regs) {
 		if (rok != 0) {
 			bpf_printk("error reading memory");
 		} else {
-			bpf_printk("stack mem: %x %x %x", buf[0], buf[1], buf[2]);
-			bpf_printk("stack mem: %x %x %x", buf[3], buf[4], buf[5]);
-			bpf_printk("stack mem: %x %x %x", buf[6], buf[7], buf[8]);
-			bpf_printk("stack mem: %x %x %x", buf[9], buf[10], buf[11]);
+			bpf_printk("stack mem: %x %x %x", gbuf2[0], gbuf2[1], gbuf2[2]);
+			bpf_printk("stack mem: %x %x %x", gbuf2[3], gbuf2[4], gbuf2[5]);
+			bpf_printk("stack mem: %x %x %x", gbuf2[6], gbuf2[7], gbuf2[8]);
+			bpf_printk("stack mem: %x %x %x", gbuf2[9], gbuf2[10], gbuf2[11]);
 		}
+
+		// long deref_sz = req.deref[i];
+		// deref_sz &= 0xff;
+		// if (deref_sz > 0) {
+		// 	// if (sz != 8) {
+		// 	// 	return 8;
+		// 	// }
+		// 	int rok2 = bpf_probe_read_user(gbuf2, deref_sz, (void*)gbuf2);
+		// 	if (rok2 != 0) {
+		// 		bpf_printk("error reading memory when dereferencing");
+		// 	}
+		// 	else {
+		// 		bpf_printk("stack mem: %x %x %x", gbuf2[0], gbuf2[1], gbuf2[2]);
+		// 		bpf_printk("stack mem: %x %x %x", gbuf2[3], gbuf2[4], gbuf2[5]);
+		// 		bpf_printk("stack mem: %x %x %x", gbuf2[6], gbuf2[7], gbuf2[8]);
+		// 		bpf_printk("stack mem: %x %x %x", gbuf2[9], gbuf2[10], gbuf2[11]);
+		// 	}
+		// }
 
 		// size_t k;
 		// size_t l;
@@ -298,10 +326,25 @@ int probe(struct pt_regs* regs) {
 		// 	}
 		// }
 
-		combine(gbuf, gbuf2, bytes_read, req.sz[0]);
+		combine(gbuf, gbuf2, bytes_read, req.sz[0]); // !!! [0]
 		bytes_read += sz;
 	}
 
+	unsigned long deref_sz = req.deref[0];
+	deref_sz &= 0xff;
+	if (deref_sz == 0) {
+		return 10;
+	}
+	void* ptr = (void*)(*(long*)gbuf2);
+	bpf_printk("!!! about to deref ptr: 0x%llx (sz: %d)", ptr, deref_sz);
+	unsigned long rok2 = bpf_probe_read_user(gbuf, deref_sz, ptr);
+	if (rok2 != 0) {
+		bpf_printk("error reading memory when dereferencing");
+	}
+	else {
+		bpf_printk("heap mem: %x %x %x", gbuf[0], gbuf[1], gbuf[2]);
+		//bpf_printk("heap mem: %x %x %x", gbuf[3], gbuf[4], gbuf[5]);
+	}
 
 	if (bytes_read > MAX_SIZE) {
 		bytes_read = MAX_SIZE;
